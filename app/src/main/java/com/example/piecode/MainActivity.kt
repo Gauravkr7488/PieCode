@@ -5,10 +5,8 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.piecode.ui.theme.PieCodeTheme
@@ -19,29 +17,24 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             PieCodeTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
+                CodeEditor() // this is here because you want to run this
             }
         }
     }
 }
 
 @Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
+fun CodeEditor(modifier: Modifier = Modifier) {
+    var text by remember { mutableStateOf("hi") } // Stores the text input and makes it editable
+    BasicTextField(
+        value = text,
+        onValueChange = { text = it }, // Updates the text as the user types
+        modifier = Modifier.fillMaxSize()
     )
 }
 
 @Preview(showBackground = true)
 @Composable
-fun GreetingPreview() {
-    PieCodeTheme {
-        Greeting("Android")
-    }
+fun CodeEditorPreview() { // this is a function that shows the preview
+    CodeEditor() // this is the function that is shown in the preview
 }
