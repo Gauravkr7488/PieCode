@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.BasicTextField
@@ -11,9 +12,13 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import com.example.piecode.ui.theme.PieCodeTheme
 
 class MainActivity : ComponentActivity() {
@@ -34,7 +39,11 @@ fun MainScreen() {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("PieCode") } // Title for the navigation bar
+                title = { Text("PieCode") }, // Title for the navigation bar
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color(0xFF4374D1), // Background color
+                    titleContentColor = Color.White
+                )
             )
         },
         modifier = Modifier.fillMaxSize()
@@ -49,7 +58,11 @@ fun CodeEditor(modifier: Modifier = Modifier) {
     BasicTextField(
         value = text,
         onValueChange = { text = it }, // Updates the text as the user types
-        modifier = modifier.fillMaxSize()
+        modifier = modifier
+            .fillMaxSize()
+            .background(Color.Black)
+            .padding(16.dp),
+        textStyle = TextStyle(color = Color.White)
     )
 }
 
@@ -57,5 +70,5 @@ fun CodeEditor(modifier: Modifier = Modifier) {
 @Composable
 fun CodeEditorPreview() { // this is a function that shows the preview
     MainScreen()
-   // CodeEditor() // this is the function that is shown in the preview
+    // CodeEditor() // this is the function that is shown in the preview
 }
