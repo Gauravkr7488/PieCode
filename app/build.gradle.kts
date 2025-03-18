@@ -2,7 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
-    id("com.chaquo.python")
+    id("com.chaquo.python") version "16.0.0" apply true  // this probably makes sure that this version is used
 }
 
 android {
@@ -19,16 +19,15 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         ndk {
-            // On Apple silicon, you can omit x86_64.
+            // On Apple silicon, you can omit x86_64 if targeting only arm64-v8a.
             abiFilters += listOf("arm64-v8a", "x86_64")
         }
-
-        chaquopy {
-            defaultConfig {
-                version = "3.8"  // Set Python version
-            }
-        }
     }
+
+    chaquopy {
+        version = "3.8"  // Moved outside defaultConfig and fixed syntax
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -38,20 +37,22 @@ android {
             )
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
+
     kotlinOptions {
         jvmTarget = "11"
     }
+
     buildFeatures {
         compose = true
     }
 }
 
 dependencies {
-
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -60,6 +61,7 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation(libs.androidx.navigation.compose)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -67,5 +69,7 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
-    implementation ("com.chaquo.python:gradle:16.0.0")
-}
+
+    // Chaquopy with exclusion to prevent duplicate class error
+    // implementation("com.chaquo.python:gradle:16.0.0")  // commented out because it was had same classes as of a different one
+    }
