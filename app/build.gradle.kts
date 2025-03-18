@@ -22,8 +22,13 @@ android {
             // On Apple silicon, you can omit x86_64.
             abiFilters += listOf("arm64-v8a", "x86_64")
         }
-    }
 
+        chaquopy {
+            defaultConfig {
+                version = "3.8"  // Set Python version
+            }
+        }
+    }
     buildTypes {
         release {
             isMinifyEnabled = false
