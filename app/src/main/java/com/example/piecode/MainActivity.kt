@@ -134,20 +134,30 @@ fun ResultScreen(output: String, navController: androidx.navigation.NavControlle
 private fun executePythonCode(code: String): String {
     return try {
         val python = Python.getInstance()
-        val console = python.getModule("sys")
         val io = python.getModule("io")
+        val console = python.getModule("sys")
 
-        // Redirect output
         val stringIO = io.callAttr("StringIO")
         console["stdout"] = stringIO
 
-        // Execute the code
-        python.getModule("code").callAttr("InteractiveInterpreter").callAttr("runsource", code)
+        val interpreter = python.getModule("code").callAttr("InteractiveInterpreter")
 
-        // Get the output
-        stringIO.callAttr("getvalue").toString()
+        // Execute the full script at once with "exec" mode
+        val result = interpreter.callAttr("runsource", code, "<stdin>", "exec").toBoolean()
+
+        val output = stringIO.callAttr("getvalue").toString().trim()
+
+        if (result) {
+            "Syntax Error: Incomplete code (check indentation or missing closing statements)"
+        } else if (output.isEmpty()) {
+            "No output"
+        } else {
+            output
+        }
+    } catch (e: com.chaquo.python.PyException) {
+        "Python Error: ${e.message}"
     } catch (e: Exception) {
-        "Error: ${e.message}"
+        "Unexpected Error: ${e.message}"
     }
 }
 
