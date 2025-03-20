@@ -132,32 +132,28 @@ fun ResultScreen(output: String, navController: androidx.navigation.NavControlle
 }
 
 private fun executePythonCode(code: String): String {
-    return try {
-        val python = Python.getInstance()
-        val io = python.getModule("io")
-        val console = python.getModule("sys")
+    val python = Python.getInstance()
+    val io = python.getModule("io")
+    val console = python.getModule("sys")
 
-        val stringIO = io.callAttr("StringIO")
-        console["stdout"] = stringIO
+    val stdoutIO = io.callAttr("StringIO")
+    console["stdout"] = stdoutIO
 
-        val interpreter = python.getModule("code").callAttr("InteractiveInterpreter")
+    val stderrIO = io.callAttr("StringIO")
+    console["stderr"] = stderrIO
 
-        // Execute the full script at once with "exec" mode
-        val result = interpreter.callAttr("runsource", code, "<stdin>", "exec").toBoolean()
+    val interpreter = python.getModule("code").callAttr("InteractiveInterpreter")
 
-        val output = stringIO.callAttr("getvalue").toString().trim()
+    val result = interpreter.callAttr("runsource", code, "<stdin>", "exec").toBoolean()
 
-        if (result) {
-            "Syntax Error: Incomplete code (check indentation or missing closing statements)"
-        } else if (output.isEmpty()) {
-            "No output"
-        } else {
-            output
-        }
-    } catch (e: com.chaquo.python.PyException) {
-        "Python Error: ${e.message}"
-    } catch (e: Exception) {
-        "Unexpected Error: ${e.message}"
+    val stdoutOutput = stdoutIO.callAttr("getvalue").toString().trim()
+    val stderrOutput = stderrIO.callAttr("getvalue").toString().trim()
+
+    return when {
+        result -> "Syntax Error: Incomplete code (check indentation or missing closing statements)"
+        stderrOutput.isNotEmpty() -> stderrOutput // Raw error output
+        stdoutOutput.isNotEmpty() -> stdoutOutput
+        else -> "No output"
     }
 }
 
