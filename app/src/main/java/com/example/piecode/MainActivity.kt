@@ -1,6 +1,7 @@
 package com.example.piecode
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -20,6 +21,7 @@ import com.chaquo.python.android.AndroidPlatform
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.chaquo.python.PyObject
 import com.example.piecode.ui.theme.PieCodeTheme
 
 class MainActivity : ComponentActivity() {
@@ -133,6 +135,7 @@ fun ResultScreen(output: String, navController: androidx.navigation.NavControlle
 
 private fun executePythonCode(code: String): String {
     val python = Python.getInstance()
+    val builtins = python.getModule("builtins")
     val io = python.getModule("io")
     val console = python.getModule("sys")
 
@@ -142,8 +145,15 @@ private fun executePythonCode(code: String): String {
     val stderrIO = io.callAttr("StringIO")
     console["stderr"] = stderrIO
 
-    val interpreter = python.getModule("code").callAttr("InteractiveInterpreter")
+    // Define a custom input function in Python
+    val customInput = PyObject.fromJava { prompt: String ->
+        Log.d("CustomInput", "Python requested input with prompt: $prompt")
+        ""
+    }
+    // Replace Python's built-in input() with this blocking function
+    builtins.put("input", customInput)
 
+    val interpreter = python.getModule("code").callAttr("InteractiveInterpreter")
     val result = interpreter.callAttr("runsource", code, "<stdin>", "exec").toBoolean()
 
     val stdoutOutput = stdoutIO.callAttr("getvalue").toString().trim()
@@ -151,7 +161,7 @@ private fun executePythonCode(code: String): String {
 
     return when {
         result -> "Syntax Error: Incomplete code (check indentation or missing closing statements)"
-        stderrOutput.isNotEmpty() -> stderrOutput // Raw error output
+        stderrOutput.isNotEmpty() -> stderrOutput
         stdoutOutput.isNotEmpty() -> stdoutOutput
         else -> "No output"
     }
